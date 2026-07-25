@@ -2,24 +2,51 @@ class MatchManager {
 
     static matches = new Map();
 
+    /**
+     * Registra uma partida.
+     */
     static create(match) {
 
         this.matches.set(
-            match.message.id,
+            match.channelId,
             match
         );
 
     }
 
-    static get(messageId) {
+    /**
+     * Obtém a partida do canal.
+     */
+    static get(channelId) {
 
-        return this.matches.get(messageId);
+        return this.matches.get(channelId);
 
     }
 
-    static delete(messageId) {
+    /**
+     * Remove a partida do canal.
+     */
+    static delete(channelId) {
 
-        this.matches.delete(messageId);
+        this.matches.delete(channelId);
+
+    }
+
+    /**
+     * Verifica se existe uma partida no canal.
+     */
+    static has(channelId) {
+
+        return this.matches.has(channelId);
+
+    }
+
+    /**
+     * Retorna todas as partidas.
+     */
+    static all() {
+
+        return [...this.matches.values()];
 
     }
 

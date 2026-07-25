@@ -3,7 +3,7 @@ const EmbedManager = require("../../game/EmbedManager");
 
 module.exports = async (interaction) => {
 
-    const match = MatchManager.get(interaction.message.id);
+    const match = MatchManager.get(interaction.channelId);
 
     if (!match)
         return;
@@ -45,7 +45,23 @@ module.exports = async (interaction) => {
         index
     );
 
-    if (played === "choose_color" || played === "choose_color_draw4") {
+    if (!played) {
+
+        return interaction.reply({
+
+            content: "❌ Você não pode jogar essa carta.",
+
+            ephemeral: true
+
+        });
+
+    }
+
+    // Se for Wild ou +4
+    if (
+        played === "choose_color" ||
+        played === "choose_color_draw4"
+    ) {
 
         const {
             ActionRowBuilder,
@@ -88,8 +104,7 @@ module.exports = async (interaction) => {
 
         return interaction.update({
 
-            content:
-                "🌈 Escolha a nova cor.",
+            content: "🌈 Escolha a nova cor.",
 
             components: [
 
@@ -103,11 +118,28 @@ module.exports = async (interaction) => {
 
     }
 
+    // Atualiza a mensagem pública da partida
+    await match.message.edit({
+
+        embeds: [
+
+            EmbedManager.match(
+                interaction.client,
+                match
+            )
+
+        ],
+
+        components: match.message.components
+
+    });
+
+    // Fecha o menu do jogador
     await interaction.update({
 
-        content: "Carta jogada!",
+        content: "✅ Carta jogada!",
 
-        components: interaction.message.components
+        components: []
 
     });
 

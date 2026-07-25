@@ -3,22 +3,17 @@ const EmbedManager = require("../../game/EmbedManager");
 
 module.exports = async (interaction) => {
 
-    const match = MatchManager.get(
-        interaction.message.id
-    );
+    const match = MatchManager.get(interaction.channelId);
 
     if (!match)
         return;
 
-    const player = match.players.find(
-        player => player.id === interaction.user.id
-    );
-
-    if (!player) {
+    // Existe um coringa aguardando?
+    if (!match.pendingWild) {
 
         return interaction.reply({
 
-            content: "❌ Você não faz parte desta partida.",
+            content: "❌ Nenhum coringa aguardando escolha de cor.",
 
             ephemeral: true
 
@@ -26,12 +21,12 @@ module.exports = async (interaction) => {
 
     }
 
-    // Apenas quem jogou o Wild pode escolher a cor
-    if (match.getCurrentPlayer().id !== interaction.user.id) {
+    // Apenas quem jogou o coringa pode escolher
+    if (match.pendingWildPlayer !== interaction.user.id) {
 
         return interaction.reply({
 
-            content: "❌ Apenas o jogador da vez pode escolher a cor.",
+            content: "❌ Apenas quem jogou o coringa pode escolher a cor.",
 
             ephemeral: true
 
@@ -39,25 +34,21 @@ module.exports = async (interaction) => {
 
     }
 
+    // Cor escolhida
     const color = interaction.values[0];
 
-    // Atualiza a cor da mesa
     match.currentColor = color;
 
-    // Se a carta for +4
-    if (match.currentCard.value === "draw4") {
+    // Se era +4
+    if (match.pendingWildType === "draw4") {
 
         // Próximo jogador
         match.advanceTurn();
 
-        const target =
-            match.getCurrentPlayer();
+        const target = match.getCurrentPlayer();
 
-        // Compra quatro cartas
-        target.drawMany(
-            match.deck,
-            4
-        );
+        // Compra 4 cartas
+        target.drawMany(match.deck, 4);
 
         // Perde o turno
         match.advanceTurn();
@@ -69,9 +60,13 @@ module.exports = async (interaction) => {
 
     }
 
-    await interaction.update({
+    // Limpa o estado do coringa
+    match.pendingWild = false;
+    match.pendingWildPlayer = null;
+    match.pendingWildType = null;
 
-        content: "🌈 Cor escolhida!",
+    // Atualiza a mensagem pública da partida
+    await match.message.edit({
 
         embeds: [
 
@@ -82,7 +77,18 @@ module.exports = async (interaction) => {
 
         ],
 
-        components: interaction.message.components
+        components: match.message.components
+
+    });
+
+    // Fecha a mensagem efêmera do seletor
+    await interaction.update({
+
+        content: "✅ Cor escolhida!",
+
+        embeds: [],
+
+        components: []
 
     });
 

@@ -11,6 +11,7 @@ const {
 
 module.exports = async (interaction) => {
 
+    // Busca a sala (Lobby)
     const game = GameManager.get(interaction.message.id);
 
     // Se não for uma sala, deixa outro handler cuidar da interação
@@ -116,7 +117,7 @@ module.exports = async (interaction) => {
 
             // Salva informações da mensagem e canal
             match.message = interaction.message;
-            match.channelId = interaction.channel.id;
+            match.channelId = interaction.channelId;
 
             // Distribui as cartas
             match.start();
@@ -128,51 +129,51 @@ module.exports = async (interaction) => {
             GameManager.delete(interaction.message.id);
 
             // Botões da partida
-const row = new ActionRowBuilder()
+            const row = new ActionRowBuilder()
 
-    .addComponents(
+                .addComponents(
 
-        new ButtonBuilder()
+                    new ButtonBuilder()
 
-            .setCustomId("game_hand")
+                        .setCustomId("game_hand")
 
-            .setLabel("Minha Mão")
+                        .setLabel("Minha Mão")
 
-            .setEmoji("🎴")
+                        .setEmoji("🎴")
 
-            .setStyle(ButtonStyle.Primary),
+                        .setStyle(ButtonStyle.Primary),
 
-        new ButtonBuilder()
+                    new ButtonBuilder()
 
-            .setCustomId("game_play")
+                        .setCustomId("game_play")
 
-            .setLabel("Jogar Carta")
+                        .setLabel("Jogar Carta")
 
-            .setEmoji("🎮")
+                        .setEmoji("🎮")
 
-            .setStyle(ButtonStyle.Success),
+                        .setStyle(ButtonStyle.Success),
 
-        new ButtonBuilder()
+                    new ButtonBuilder()
 
-            .setCustomId("game_draw")
+                        .setCustomId("game_draw")
 
-            .setLabel("Comprar")
+                        .setLabel("Comprar")
 
-            .setEmoji("➕")
+                        .setEmoji("➕")
 
-            .setStyle(ButtonStyle.Secondary),
+                        .setStyle(ButtonStyle.Secondary),
 
-        new ButtonBuilder()
+                    new ButtonBuilder()
 
-            .setCustomId("game_uno")
+                        .setCustomId("game_uno")
 
-            .setLabel("UNO!")
+                        .setLabel("UNO!")
 
-            .setEmoji("📢")
+                        .setEmoji("📢")
 
-            .setStyle(ButtonStyle.Danger)
+                        .setStyle(ButtonStyle.Danger)
 
-    );
+                );
 
             await interaction.update({
 
@@ -209,7 +210,7 @@ const row = new ActionRowBuilder()
 
             GameManager.delete(interaction.message.id);
 
-            await interaction.message.delete().catch(() => { });
+            await interaction.message.delete().catch(() => {});
 
             break;
 

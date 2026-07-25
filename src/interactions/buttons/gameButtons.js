@@ -9,7 +9,7 @@ const EmojiManager = require("../../managers/EmojiManager");
 
 module.exports = async (interaction) => {
 
-    const match = MatchManager.get(interaction.message.id);
+    const match = MatchManager.get(interaction.channelId);
 
     // Não é uma partida
     if (!match)

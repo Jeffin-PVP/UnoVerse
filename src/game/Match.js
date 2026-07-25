@@ -232,8 +232,8 @@ class Match {
                 this.placeWild(card);
 
                 this.pendingWild = true;
-
                 this.pendingWildPlayer = player.id;
+                this.pendingWildType = "wild";
 
                 return "choose_color";
 
@@ -244,8 +244,8 @@ class Match {
                 this.placeWild(card);
 
                 this.pendingWild = true;
-
                 this.pendingWildPlayer = player.id;
+                this.pendingWildType = "draw4";
 
                 return "choose_color_draw4";
 
