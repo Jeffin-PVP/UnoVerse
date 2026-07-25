@@ -45,14 +45,59 @@ module.exports = async (interaction) => {
         index
     );
 
-    if (!played) {
+    if (played === "choose_color" || played === "choose_color_draw4") {
 
-        return interaction.reply({
+        const {
+            ActionRowBuilder,
+            StringSelectMenuBuilder
+        } = require("discord.js");
+
+        const menu = new StringSelectMenuBuilder()
+
+            .setCustomId("choose_color")
+
+            .setPlaceholder("🌈 Escolha uma cor")
+
+            .addOptions([
+
+                {
+                    label: "Vermelho",
+                    value: "red",
+                    emoji: "🔴"
+                },
+
+                {
+                    label: "Amarelo",
+                    value: "yel",
+                    emoji: "🟡"
+                },
+
+                {
+                    label: "Verde",
+                    value: "grn",
+                    emoji: "🟢"
+                },
+
+                {
+                    label: "Azul",
+                    value: "blu",
+                    emoji: "🔵"
+                }
+
+            ]);
+
+        return interaction.update({
 
             content:
-                "❌ Você não pode jogar essa carta.",
+                "🌈 Escolha a nova cor.",
 
-            ephemeral: true
+            components: [
+
+                new ActionRowBuilder()
+
+                    .addComponents(menu)
+
+            ]
 
         });
 
@@ -60,18 +105,9 @@ module.exports = async (interaction) => {
 
     await interaction.update({
 
-        content: "✅ Carta jogada!",
+        content: "Carta jogada!",
 
-        embeds: [
-
-            EmbedManager.match(
-                interaction.client,
-                match
-            )
-
-        ],
-
-        components: []
+        components: interaction.message.components
 
     });
 

@@ -22,6 +22,11 @@ class Match {
 
         this.currentCard = null;
 
+        // Aguarda escolha de cor do coringa
+        this.pendingWild = false;
+
+        this.pendingWildPlayer = null;
+
         this.message = game.message;
 
         this.channelId = game.channelId;
@@ -75,9 +80,56 @@ class Match {
 
     }
 
+    /**
+     * Avança o turno uma quantidade de jogadores.
+     */
+    advanceTurn(steps = 1) {
+
+        for (let i = 0; i < steps; i++) {
+
+            this.nextTurn();
+
+        }
+
+    }
+
     reverse() {
 
         this.direction *= -1;
+
+    }
+
+    /**
+     * Pula o próximo jogador.
+     */
+    skip() {
+
+        this.advanceTurn(2);
+
+    }
+
+    /**
+     * Coloca uma carta normal na mesa.
+     */
+    placeCard(card) {
+
+        this.currentCard = card;
+
+        this.currentColor = card.color;
+
+        this.discard.push(card);
+
+    }
+
+    /**
+     * Coloca um coringa na mesa.
+     * A cor será escolhida depois.
+     */
+    placeWild(card) {
+
+        this.currentCard = card;
+
+        this.discard.push(card);
 
     }
 
@@ -94,7 +146,7 @@ class Match {
         if (card.color === this.currentColor)
             return true;
 
-        // Mesmo valor
+        // Mesmo número ou ação
         if (card.value === this.currentCard.value)
             return true;
 
@@ -118,15 +170,93 @@ class Match {
         // Remove da mão
         player.hand.splice(index, 1);
 
-        // Atualiza a mesa
-        this.currentCard = card;
+        switch (card.value) {
 
-        this.currentColor = card.color;
+            case "reverse": {
 
-        this.discard.push(card);
+                this.placeCard(card);
 
-        // Passa o turno
-        this.nextTurn();
+                // Em partidas de 2 jogadores,
+                // Reverse funciona como Skip
+                if (this.players.length === 2) {
+
+                    this.skip();
+
+                } else {
+
+                    this.reverse();
+
+                    this.advanceTurn();
+
+                }
+
+                return true;
+
+            }
+
+            case "skip": {
+
+                this.placeCard(card);
+
+                this.skip();
+
+                return true;
+
+            }
+
+            case "draw2": {
+
+                this.placeCard(card);
+
+                // Próximo jogador
+                this.advanceTurn();
+
+                const target =
+                    this.getCurrentPlayer();
+
+                // Compra duas cartas
+                target.drawMany(
+                    this.deck,
+                    2
+                );
+
+                // Perde o turno
+                this.advanceTurn();
+
+                return true;
+
+            }
+
+            case "wild": {
+
+                this.placeWild(card);
+
+                this.pendingWild = true;
+
+                this.pendingWildPlayer = player.id;
+
+                return "choose_color";
+
+            }
+
+            case "draw4": {
+
+                this.placeWild(card);
+
+                this.pendingWild = true;
+
+                this.pendingWildPlayer = player.id;
+
+                return "choose_color_draw4";
+
+            }
+
+        }
+
+        // Carta normal
+        this.placeCard(card);
+
+        this.advanceTurn();
 
         return true;
 

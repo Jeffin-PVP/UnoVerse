@@ -12,6 +12,9 @@ const gameButtons =
 const playCard =
     require("../interactions/selectMenus/playCard");
 
+const chooseColor =
+    require("../interactions/selectMenus/chooseColor");
+
 module.exports = {
 
     name: Events.InteractionCreate,
@@ -47,9 +50,15 @@ module.exports = {
             // Menus de seleção
             if (interaction.isStringSelectMenu()) {
 
-                if (interaction.customId === "play_card") {
+                switch (interaction.customId) {
 
-                    return await playCard(interaction);
+                    case "play_card":
+
+                        return await playCard(interaction);
+
+                    case "choose_color":
+
+                        return await chooseColor(interaction);
 
                 }
 
