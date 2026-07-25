@@ -48,7 +48,10 @@ module.exports = async (interaction) => {
         const target = match.getCurrentPlayer();
 
         // Compra 4 cartas
-        target.drawMany(match.deck, 4);
+        match.drawCards(
+            target,
+            4
+        );
 
         // Perde o turno
         match.advanceTurn();

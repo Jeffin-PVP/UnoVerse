@@ -24,8 +24,8 @@ class Match {
 
         // Aguarda escolha de cor do coringa
         this.pendingWild = false;
-
         this.pendingWildPlayer = null;
+        this.pendingWildType = null;
 
         this.message = game.message;
 
@@ -37,8 +37,8 @@ class Match {
 
         for (const player of this.players) {
 
-            player.drawMany(
-                this.deck,
+            this.drawCards(
+                player,
                 this.cardsPerPlayer
             );
 
@@ -81,7 +81,7 @@ class Match {
     }
 
     /**
-     * Avança o turno uma quantidade de jogadores.
+     * Avança o turno.
      */
     advanceTurn(steps = 1) {
 
@@ -99,9 +99,6 @@ class Match {
 
     }
 
-    /**
-     * Pula o próximo jogador.
-     */
     skip() {
 
         this.advanceTurn(2);
@@ -109,8 +106,59 @@ class Match {
     }
 
     /**
-     * Coloca uma carta normal na mesa.
+     * Reabastece o baralho usando o descarte.
      */
+    refillDeck() {
+
+        // Precisa sobrar a carta da mesa
+        if (this.discard.length <= 1)
+            return false;
+
+        const topCard = this.discard.pop();
+
+        this.deck.cards = [...this.discard];
+
+        this.discard = [topCard];
+
+        this.deck.shuffle();
+
+        return true;
+
+    }
+
+    /**
+     * Compra uma carta.
+     */
+    drawCard(player) {
+
+        if (this.deck.cards.length === 0) {
+
+            const refilled =
+                this.refillDeck();
+
+            if (!refilled)
+                return null;
+
+        }
+
+        return player.draw(this.deck);
+
+    }
+
+    /**
+     * Compra várias cartas.
+     */
+    drawCards(player, amount) {
+
+        for (let i = 0; i < amount; i++) {
+
+            if (!this.drawCard(player))
+                break;
+
+        }
+
+    }
+
     placeCard(card) {
 
         this.currentCard = card;
@@ -121,10 +169,6 @@ class Match {
 
     }
 
-    /**
-     * Coloca um coringa na mesa.
-     * A cor será escolhida depois.
-     */
     placeWild(card) {
 
         this.currentCard = card;
@@ -133,20 +177,14 @@ class Match {
 
     }
 
-    /**
-     * Verifica se uma carta pode ser jogada.
-     */
     canPlay(card) {
 
-        // Coringas sempre podem
         if (card.color === "wild")
             return true;
 
-        // Mesma cor
         if (card.color === this.currentColor)
             return true;
 
-        // Mesmo número ou ação
         if (card.value === this.currentCard.value)
             return true;
 
@@ -154,9 +192,6 @@ class Match {
 
     }
 
-    /**
-     * Joga uma carta.
-     */
     playCard(player, index) {
 
         const card = player.hand[index];
@@ -176,8 +211,6 @@ class Match {
 
                 this.placeCard(card);
 
-                // Em partidas de 2 jogadores,
-                // Reverse funciona como Skip
                 if (this.players.length === 2) {
 
                     this.skip();
@@ -208,19 +241,16 @@ class Match {
 
                 this.placeCard(card);
 
-                // Próximo jogador
                 this.advanceTurn();
 
                 const target =
                     this.getCurrentPlayer();
 
-                // Compra duas cartas
-                target.drawMany(
-                    this.deck,
+                this.drawCards(
+                    target,
                     2
                 );
 
-                // Perde o turno
                 this.advanceTurn();
 
                 return true;
@@ -232,7 +262,9 @@ class Match {
                 this.placeWild(card);
 
                 this.pendingWild = true;
+
                 this.pendingWildPlayer = player.id;
+
                 this.pendingWildType = "wild";
 
                 return "choose_color";
@@ -244,7 +276,9 @@ class Match {
                 this.placeWild(card);
 
                 this.pendingWild = true;
+
                 this.pendingWildPlayer = player.id;
+
                 this.pendingWildType = "draw4";
 
                 return "choose_color_draw4";

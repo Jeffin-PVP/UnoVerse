@@ -148,7 +148,7 @@ ${hand || "Nenhuma carta."}`,
 
             }
 
-            current.draw(match.deck);
+            match.drawCard(current);
 
             match.nextTurn();
 
